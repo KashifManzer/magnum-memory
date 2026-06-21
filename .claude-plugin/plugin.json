@@ -1,0 +1,20 @@
+{
+  "name": "magnum-memory",
+  "description": "Persistent per-project memory for Claude Code that survives context compaction. Captures the durable specifics compaction drops (decisions, rationale, dead-ends, paths, configs) and re-injects them after each compaction.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Kashif Manzer",
+    "email": "kmanzer3@gmail.com"
+  },
+  "homepage": "https://github.com/KashifManzer/magnum-memory",
+  "repository": "https://github.com/KashifManzer/magnum-memory",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "context",
+    "compaction",
+    "persistence",
+    "skills",
+    "claude-code"
+  ]
+}
