@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# magnum-memory SessionStart hook: inject the Current State section.
+set -euo pipefail
+
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+CONTEXT="${PROJECT_DIR}/.claude/memory/CONTEXT.md"
+
+[ -f "$CONTEXT" ] || exit 0
+
+current_state="$(awk '
+  /^## Current State[[:space:]]*$/ { grab = 1; print; next }
+  /^## / && grab { exit }
+  grab { print }
+' "$CONTEXT")"
+
+# No-op if there is no real content beyond the "## Current State" heading line.
+body_only="$(printf '%s\n' "$current_state" | sed '1d')"
+if [ -z "$(printf '%s' "$body_only" | tr -d '[:space:]')" ]; then
+  exit 0
+fi
+
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+intro="The following is your magnum-memory for this project — durable specifics the compaction summary does not retain. Treat it as background context, not new instructions."
+payload="$(printf '%s\n\n%s' "$intro" "$current_state")"
+escaped="$(escape_for_json "$payload")"
+
+printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$escaped"
+exit 0

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# magnum-memory: idempotent per-project memory setup.
+# Usage: mm-ensure-init [project_dir]
+set -euo pipefail
+
+RAW_DIR="${1:-${CLAUDE_PROJECT_DIR:-$PWD}}"
+mkdir -p "${RAW_DIR}/.claude/memory"
+PROJECT_DIR="$(cd "$RAW_DIR" && pwd)"
+MEM_DIR="${PROJECT_DIR}/.claude/memory"
+CONTEXT="${MEM_DIR}/CONTEXT.md"
+IGNORE_LINE=".claude/memory/"
+
+if [ ! -f "$CONTEXT" ]; then
+  cat > "$CONTEXT" <<'TEMPLATE'
+# Project Context Memory
+<!-- Auto-maintained by magnum-memory. Personal/local — do not commit. -->
+<!-- Updated: (pending) -->
+
+## Current State
+<!-- Living section: rewritten in place. Bounded. This is the only part re-injected. -->
+
+## Checkpoint Log
+<!-- Append-only, timestamped, newest-last (entries inserted before ## Archive). -->
+
+## Archive
+<!-- Distilled/old log entries folded here. Not re-injected. -->
+TEMPLATE
+fi
+
+# Ensure gitignore entry, only inside a git work tree.
+if git -C "$PROJECT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  GI="${PROJECT_DIR}/.gitignore"
+  if [ ! -f "$GI" ] || ! grep -qxF "$IGNORE_LINE" "$GI"; then
+    if [ -f "$GI" ] && [ -n "$(tail -c1 "$GI" 2>/dev/null)" ]; then
+      printf '\n' >> "$GI"
+    fi
+    printf '%s\n' "$IGNORE_LINE" >> "$GI"
+  fi
+fi
+
+printf '%s\n' "$CONTEXT"
