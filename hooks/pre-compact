@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# magnum-memory PreCompact hook: record a compaction-boundary marker.
+# Must never block compaction -> no `set -e`.
+set -uo pipefail
+
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+CONTEXT="${PROJECT_DIR}/.claude/memory/CONTEXT.md"
+
+[ -f "$CONTEXT" ] || exit 0
+
+input="$(cat 2>/dev/null || true)"
+trigger="unknown"
+case "$input" in
+  *'"trigger"'*'"manual"'*) trigger="manual" ;;
+  *'"trigger"'*'"auto"'*)   trigger="auto" ;;
+esac
+
+ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+marker="### ${ts} — compaction (${trigger})"
+
+tmp="$(mktemp)"
+awk -v block="$marker" '
+  /^## Archive[[:space:]]*$/ && !done { print block; print ""; done = 1 }
+  { print }
+  END { if (!done) { print ""; print block } }
+' "$CONTEXT" > "$tmp" && mv "$tmp" "$CONTEXT"
+
+exit 0
