@@ -43,5 +43,13 @@ printf '# Mem\n\n## Checkpoint Log\n\n## Archive\n' > "$U/.claude/memory/CONTEXT
 printf '{}' | CLAUDE_PROJECT_DIR="$U" bash "$HOOK"
 assert_contains "unknown trigger recorded" "$(cat "$U/.claude/memory/CONTEXT.md")" "compaction (unknown)"
 
-rm -rf "$P" "$Q" "$N" "$U"
+# No Archive but a trailing section -> marker stays in the Checkpoint Log section
+T="$(mktemp -d)"; mkdir -p "$T/.claude/memory"
+printf '# Mem\n\n## Checkpoint Log\n### old\n- x\n\n## Notes\n- n\n' > "$T/.claude/memory/CONTEXT.md"
+printf '{"trigger":"manual"}' | CLAUDE_PROJECT_DIR="$T" bash "$HOOK"
+mk="$(grep -n 'compaction (manual)' "$T/.claude/memory/CONTEXT.md" | head -1 | cut -d: -f1)"
+nt="$(grep -n '^## Notes' "$T/.claude/memory/CONTEXT.md" | head -1 | cut -d: -f1)"
+assert_eq "marker before trailing non-Archive section" "yes" "$([ "$mk" -lt "$nt" ] && echo yes || echo no)"
+
+rm -rf "$P" "$Q" "$N" "$U" "$T"
 finish

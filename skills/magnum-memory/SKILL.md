@@ -44,17 +44,17 @@ to the project `.gitignore` (this memory is personal/local — never commit it).
 Template (indented):
 
     # Project Context Memory
-    <!-- Auto-maintained by magnum-memory. Personal/local - do not commit. -->
+    <!-- Auto-maintained by magnum-memory. Personal/local — do not commit. -->
     <!-- Updated: (pending) -->
 
     ## Current State
-    <!-- Living section: rewritten in place. Bounded. Re-read this on resume. -->
+    <!-- Living section: rewritten in place. Bounded. This is the only part re-injected. -->
 
     ## Checkpoint Log
     <!-- Append-only, timestamped, newest-last (entries inserted before ## Archive). -->
 
     ## Archive
-    <!-- Distilled/old log entries folded here. -->
+    <!-- Distilled/old log entries folded here. Not re-injected. -->
 
 If you installed magnum-memory as the full plugin, you can instead run the helper,
 which does exactly this deterministically:

@@ -19,8 +19,11 @@ ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 marker="### ${ts} — compaction (${trigger})"
 
 tmp="$(mktemp)"
+# Insert the marker at the end of the "## Checkpoint Log" section: before the
+# first "## " heading that follows it (normally "## Archive"); else append at EOF.
 awk -v block="$marker" '
-  /^## Archive[[:space:]]*$/ && !done { print block; print ""; done = 1 }
+  /^## Checkpoint Log[[:space:]]*$/ { in_log = 1; print; next }
+  in_log && /^## / && !done { print block; print ""; done = 1; in_log = 0 }
   { print }
   END { if (!done) { print ""; print block } }
 ' "$CONTEXT" > "$tmp" && mv "$tmp" "$CONTEXT"
