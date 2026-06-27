@@ -193,10 +193,26 @@ your needs — each of these projects is excellent at what it sets out to do.
 | [memory-bank-skill](https://github.com/chuck-ma/memory-bank-skill) | Maintains a structured Markdown "memory bank"; auto-injects | Hierarchical Markdown (`MEMORY.md` + `details/`) | Whole-bank injection (capped ~12k chars) | TypeScript / bun | see repo |
 | [CLAUDE.md](https://code.claude.com/docs/en/memory) (native) | Hand-written durable project instructions | `CLAUDE.md` (Markdown) | — (always loaded) | built-in | n/a |
 
-If you want a full, searchable archive of your history across sessions and projects, the
-capture-everything tools above are a great choice. If you'd rather have something tiny and
-private that simply brings back what a compaction dropped, magnum-memory may be a good fit
-— and many people happily use more than one.
+### What magnum-memory does especially well
+
+In the spirit of *different tools, different strengths*, a few things we're proud of:
+
+- **Truly zero-dependency** — no Node, database, vector store, or background daemon; just
+  Bash and a Markdown file. It runs anywhere `bash` does and adds nothing to maintain.
+- **A sharp guiding principle — store only what compaction forgets.** Rather than
+  capturing everything and searching it later, magnum-memory deliberately saves the
+  *complement* of the compaction summary, so the re-injected context stays small and
+  high-signal.
+- **Private and portable by default** — memory is one human-readable, per-project,
+  gitignored file you can open, diff, or delete; nothing leaves your machine.
+- **Small but carefully built** — 100+ test assertions plus CI (shellcheck, JSON
+  validation, and the full suite) behind a few hundred lines of Bash.
+
+None of this makes it "better" — just a clear, honest niche. If you want a full,
+searchable archive of your history across sessions and projects, the capture-everything
+tools above are a great choice. If you'd rather have something tiny and private that simply
+brings back what a compaction dropped, magnum-memory may be a good fit — and many people
+happily use more than one.
 
 > *Comparison researched 2026-06-27 from each project's public repository. These tools
 > evolve quickly, so please verify the latest details upstream — corrections are very
