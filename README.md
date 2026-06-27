@@ -179,14 +179,28 @@ All optional, via environment variables:
 
 ## How it compares
 
-- **vs. manual notes:** magnum-memory captures automatically and re-injects after
-  compaction; you don't have to remember to write or re-read anything.
-- **vs. heavy "capture-everything" tools** (transcript archives, search indexes, MCP
-  servers): those are more powerful for cross-project search, but require a runtime and
-  store a lot of (often redundant) content. magnum-memory is intentionally minimal and
-  *curated* — it stores only what compaction loses, with zero dependencies. Different
-  trade-off, honestly: if you want a full searchable archive across all projects, a
-  heavier tool fits better.
+Claude Code has a healthy ecosystem of memory tools — several of them more mature and
+feature-rich than this one. magnum-memory isn't trying to replace them; it's a small,
+focused take for people who want a lightweight, per-project memory with no runtime to
+manage. The snapshot below is meant to be neutral and factual so you can choose what fits
+your needs — each of these projects is excellent at what it sets out to do.
+
+| Tool | Approach | Storage | Search / recall | Runtime | License |
+|---|---|---|---|---|---|
+| **magnum-memory** | Curated "only what compaction drops"; re-injects Current State | Per-project, gitignored `CONTEXT.md` (Markdown) | `/recall` — grep over Log + Archive (per-word AND) | Bash + Markdown, no runtime deps | MIT |
+| [c0ntextKeeper](https://github.com/Capnjbrown/c0ntextKeeper) | Automatic transcript capture; pattern-based extraction; secret redaction | Global JSON archives | MCP tools + CLI (keyword + scoring) | TypeScript / Node + MCP server | MIT |
+| [claude-mem](https://github.com/thedotmack/claude-mem) | Captures sessions, AI-compresses, re-injects | SQLite (FTS5) + vector DB | Vector + keyword (MCP + web UI) | Node / Bun + local worker | Apache-2.0 |
+| [memory-bank-skill](https://github.com/chuck-ma/memory-bank-skill) | Maintains a structured Markdown "memory bank"; auto-injects | Hierarchical Markdown (`MEMORY.md` + `details/`) | Whole-bank injection (capped ~12k chars) | TypeScript / bun | see repo |
+| [CLAUDE.md](https://code.claude.com/docs/en/memory) (native) | Hand-written durable project instructions | `CLAUDE.md` (Markdown) | — (always loaded) | built-in | n/a |
+
+If you want a full, searchable archive of your history across sessions and projects, the
+capture-everything tools above are a great choice. If you'd rather have something tiny and
+private that simply brings back what a compaction dropped, magnum-memory may be a good fit
+— and many people happily use more than one.
+
+> *Comparison researched 2026-06-27 from each project's public repository. These tools
+> evolve quickly, so please verify the latest details upstream — corrections are very
+> welcome via an issue or PR.*
 
 ## FAQ
 
