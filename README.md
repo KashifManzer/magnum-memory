@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🧠 magnum-memory
+<img src="assets/banner.svg" alt="magnum-memory — memory for Claude Code that survives context compaction" width="760">
 
-### Persistent memory for Claude Code that survives context compaction
+# 🧠 magnum-memory
 
 *Stop re-explaining your project after every compaction. magnum-memory quietly remembers the
 durable specifics Claude forgets — and brings them right back.*
