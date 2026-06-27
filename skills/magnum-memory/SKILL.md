@@ -124,6 +124,7 @@ already in context):
 
 - **Full plugin:** run `/recall <words>` (or
   `"${CLAUDE_PLUGIN_ROOT}/scripts/mm-recall" <words>`). It returns whole entries
-  containing **all** the words (case-insensitive), most-recent first.
+  containing **all** the words (case-insensitive; matched per word, not as a phrase),
+  most-recent first.
 - **Skill-only:** grep `.claude/memory/CONTEXT.md` yourself — scan the `### ` entries
   under `## Checkpoint Log` and `## Archive` for the user's terms and report the matches.
