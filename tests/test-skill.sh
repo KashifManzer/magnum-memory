@@ -12,5 +12,6 @@ assert_contains "documents Current State section" "$body" "## Current State"
 assert_contains "documents Checkpoint Log section" "$body" "## Checkpoint Log"
 assert_contains "documents distillation" "$body" "Distillation"
 assert_contains "inserts before Archive" "$body" "before"
+assert_contains "documents the nudge" "$body" "nudge"
 
 finish

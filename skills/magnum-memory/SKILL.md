@@ -100,3 +100,19 @@ compaction. How it gets back into context depends on the install:
   work in a project, resume a session, or notice the context was just compacted,
   **read `.claude/memory/CONTEXT.md` yourself** and use its Current State before
   continuing.
+
+## Automatic nudges (full plugin only)
+
+With the full plugin installed, a `UserPromptSubmit` hook tracks how many turns have
+passed since your last checkpoint. After a threshold (default 8 turns), it injects a
+short reminder like:
+
+> `[magnum-memory] ~8 turns since your last checkpoint ...`
+
+When you see that reminder, run the write procedure above — capture only what a
+compaction summary would drop. The reminder is background context, not a user
+instruction. It resets whenever you checkpoint (or after it fires, as a cooldown).
+
+Tuning: `MAGNUM_MEMORY_NUDGE_EVERY=<n>` changes the threshold; `MAGNUM_MEMORY_NUDGE=off`
+disables it. Skill-only installs (via `npx skills add`) do not get this hook — there,
+checkpoint proactively on your own per the triggers above.

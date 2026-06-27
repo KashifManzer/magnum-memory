@@ -15,6 +15,8 @@ assert_contains "wires PreCompact" "$hj" "PreCompact"
 assert_contains "uses run-hook.cmd wrapper" "$hj" "run-hook.cmd"
 assert_contains "references session-start script" "$hj" "session-start"
 assert_contains "references pre-compact script" "$hj" "pre-compact"
+assert_contains "wires UserPromptSubmit" "$hj" "UserPromptSubmit"
+assert_contains "references user-prompt-submit script" "$hj" "user-prompt-submit"
 
 # run-hook.cmd dispatches to a named script on Unix
 TMP="$(mktemp -d)"; mkdir -p "$TMP/hooks"

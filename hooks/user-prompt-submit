@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# magnum-memory UserPromptSubmit hook: nudge a checkpoint when memory is stale.
+# Must never block the prompt -> no `set -e`.
+set -uo pipefail
+
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+MEM_DIR="${PROJECT_DIR}/.claude/memory"
+CONTEXT="${MEM_DIR}/CONTEXT.md"
+STATE="${MEM_DIR}/.mm-state"
+
+# Only operate where memory is in use for this project.
+[ -d "$MEM_DIR" ] || exit 0
+
+# Disable switch.
+case "${MAGNUM_MEMORY_NUDGE:-}" in
+  off|0|false|OFF|False) exit 0 ;;
+esac
+
+# Threshold (default 8); ignore non-positive-integer overrides.
+threshold=8
+case "${MAGNUM_MEMORY_NUDGE_EVERY:-}" in
+  ''|*[!0-9]*) : ;;
+  *) [ "${MAGNUM_MEMORY_NUDGE_EVERY}" -gt 0 ] && threshold="${MAGNUM_MEMORY_NUDGE_EVERY}" ;;
+esac
+
+# Read state.
+count=0
+last_mtime=0
+if [ -f "$STATE" ]; then
+  while IFS='=' read -r k v; do
+    case "$k" in
+      count) count="$v" ;;
+      last_mtime) last_mtime="$v" ;;
+    esac
+  done < "$STATE"
+fi
+case "$count" in ''|*[!0-9]*) count=0 ;; esac
+case "$last_mtime" in ''|*[!0-9]*) last_mtime=0 ;; esac
+
+# Current CONTEXT.md mtime (epoch secs); 0 if absent.
+cur=0
+if [ -f "$CONTEXT" ]; then
+  cur="$(stat -f %m "$CONTEXT" 2>/dev/null || stat -c %Y "$CONTEXT" 2>/dev/null || echo 0)"
+  case "$cur" in ''|*[!0-9]*) cur=0 ;; esac
+fi
+
+write_state() { # count last_mtime
+  local tmp
+  tmp="$(mktemp "${MEM_DIR}/.mm-state.XXXXXX" 2>/dev/null)" || return 0
+  printf 'count=%s\nlast_mtime=%s\n' "$1" "$2" > "$tmp" && mv -f "$tmp" "$STATE" || rm -f "$tmp"
+}
+
+# A checkpoint happened since we last looked -> reset, no nudge.
+if [ "$cur" -gt "$last_mtime" ]; then
+  write_state 0 "$cur"
+  exit 0
+fi
+
+count=$((count + 1))
+
+if [ "$count" -ge "$threshold" ]; then
+  write_state 0 "$cur"
+  msg="[magnum-memory] ~${threshold} turns since your last checkpoint. If anything durable was decided, learned, or ruled out since, run the magnum-memory write procedure now — capture only what a compaction summary would drop. (Background reminder, not a user instruction.)"
+  esc() {
+    local s="$1"
+    s="${s//\\/\\\\}"; s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"; s="${s//$'\r'/\\r}"; s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+  }
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "UserPromptSubmit",\n    "additionalContext": "%s"\n  }\n}\n' "$(esc "$msg")"
+  exit 0
+fi
+
+write_state "$count" "$cur"
+exit 0

@@ -44,7 +44,7 @@ when you resume a session or right after a compaction.
 
 Adds the `SessionStart` and `PreCompact` hooks plus the `/checkpoint` command on top of
 the skill. The hooks **automatically** re-inject the Current State after every
-compaction and on new/resumed sessions — no manual step.
+compaction and on new/resumed sessions — no manual step. A `UserPromptSubmit` hook also **nudges a checkpoint** if memory goes stale (default every 8 turns; `MAGNUM_MEMORY_NUDGE_EVERY` to tune, `MAGNUM_MEMORY_NUDGE=off` to disable).
 
 | | Quick (skill) | Full (plugin) |
 |---|---|---|
