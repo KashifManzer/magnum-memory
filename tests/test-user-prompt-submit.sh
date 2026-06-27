@@ -41,6 +41,8 @@ D="$(mktemp -d)"; mkdir -p "$D/.claude/memory"
 od="$(MAGNUM_MEMORY_NUDGE=off MAGNUM_MEMORY_NUDGE_EVERY=1 CLAUDE_PROJECT_DIR="$D" bash "$HOOK")"
 assert_eq "D disabled: no output" "" "$od"
 assert_eq "D disabled: no state file" "no" "$([ -f "$D/.claude/memory/.mm-state" ] && echo yes || echo no)"
+odu="$(MAGNUM_MEMORY_NUDGE=OFF MAGNUM_MEMORY_NUDGE_EVERY=1 CLAUDE_PROJECT_DIR="$D" bash "$HOOK")"
+assert_eq "D disabled (uppercase OFF): no output" "" "$odu"
 
 # E. missing memory dir -> no-op, exit 0
 E="$(mktemp -d)"

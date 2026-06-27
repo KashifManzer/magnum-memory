@@ -11,9 +11,9 @@ STATE="${MEM_DIR}/.mm-state"
 # Only operate where memory is in use for this project.
 [ -d "$MEM_DIR" ] || exit 0
 
-# Disable switch.
-case "${MAGNUM_MEMORY_NUDGE:-}" in
-  off|0|false|OFF|False) exit 0 ;;
+# Disable switch (case-insensitive: off / 0 / false).
+case "$(printf '%s' "${MAGNUM_MEMORY_NUDGE:-}" | tr '[:upper:]' '[:lower:]')" in
+  off|0|false) exit 0 ;;
 esac
 
 # Threshold (default 8); ignore non-positive-integer overrides.
@@ -46,6 +46,7 @@ fi
 
 write_state() { # count last_mtime
   local tmp
+  # temp file in MEM_DIR (same filesystem) so the mv below is atomic
   tmp="$(mktemp "${MEM_DIR}/.mm-state.XXXXXX" 2>/dev/null)" || return 0
   printf 'count=%s\nlast_mtime=%s\n' "$1" "$2" > "$tmp" && mv -f "$tmp" "$STATE" || rm -f "$tmp"
 }

@@ -44,7 +44,9 @@ when you resume a session or right after a compaction.
 
 Adds the `SessionStart` and `PreCompact` hooks plus the `/checkpoint` command on top of
 the skill. The hooks **automatically** re-inject the Current State after every
-compaction and on new/resumed sessions — no manual step. A `UserPromptSubmit` hook also **nudges a checkpoint** if memory goes stale (default every 8 turns; `MAGNUM_MEMORY_NUDGE_EVERY` to tune, `MAGNUM_MEMORY_NUDGE=off` to disable).
+compaction and on new/resumed sessions — no manual step. A `UserPromptSubmit` hook also
+**nudges a checkpoint** if memory goes stale (default every 8 turns;
+`MAGNUM_MEMORY_NUDGE_EVERY` to tune, `MAGNUM_MEMORY_NUDGE=off` to disable).
 
 | | Quick (skill) | Full (plugin) |
 |---|---|---|
@@ -58,6 +60,7 @@ compaction and on new/resumed sessions — no manual step. A `UserPromptSubmit` 
   *why* and rejected alternatives), root causes, dead-ends, key paths/configs, and
   preferences you state.
 - Force a checkpoint anytime (full install) with **`/checkpoint`**.
+- **Recall past work** (full plugin) with **`/recall <words>`** — searches the Checkpoint Log + Archive for entries matching all the words.
 - The memory lives at `.claude/memory/CONTEXT.md` and is kept out of git via
   `.gitignore`, so it stays personal and local.
 

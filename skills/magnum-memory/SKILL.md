@@ -116,3 +116,14 @@ instruction. It resets whenever you checkpoint (or after it fires, as a cooldown
 Tuning: `MAGNUM_MEMORY_NUDGE_EVERY=<n>` changes the threshold; `MAGNUM_MEMORY_NUDGE=off`
 disables it. Skill-only installs (via `npx skills add`) do not get this hook — there,
 checkpoint proactively on your own per the triggers above.
+
+## Recall (history search)
+
+To find past work, search the Checkpoint Log + Archive (not the Current State — that is
+already in context):
+
+- **Full plugin:** run `/recall <words>` (or
+  `"${CLAUDE_PLUGIN_ROOT}/scripts/mm-recall" <words>`). It returns whole entries
+  containing **all** the words (case-insensitive), most-recent first.
+- **Skill-only:** grep `.claude/memory/CONTEXT.md` yourself — scan the `### ` entries
+  under `## Checkpoint Log` and `## Archive` for the user's terms and report the matches.

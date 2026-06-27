@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# magnum-memory recall: print Checkpoint Log/Archive entries matching ALL query words.
+# Read-only; always exits 0.
+set -uo pipefail
+
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+CONTEXT="${PROJECT_DIR}/.claude/memory/CONTEXT.md"
+
+# No query or no file -> nothing to recall.
+if [ "$#" -eq 0 ] || [ ! -f "$CONTEXT" ]; then
+  echo "no matching entries"
+  exit 0
+fi
+
+# Lowercase the query words (space-joined).
+lc_words="$(printf '%s' "$*" | tr '[:upper:]' '[:lower:]')"
+
+# Result cap (default 10).
+limit=10
+case "${MAGNUM_MEMORY_RECALL_LIMIT:-}" in
+  ''|*[!0-9]*) : ;;
+  *) [ "${MAGNUM_MEMORY_RECALL_LIMIT}" -gt 0 ] && limit="${MAGNUM_MEMORY_RECALL_LIMIT}" ;;
+esac
+
+awk -v words="$lc_words" -v limit="$limit" '
+BEGIN { nw = split(words, W, " ") }
+function flush(   i, lc, ok) {
+  if (!have) return
+  lc = tolower(buf); ok = 1
+  for (i = 1; i <= nw; i++) if (index(lc, W[i]) == 0) { ok = 0; break }
+  if (ok) {
+    total++
+    if (total <= limit) { if (printed) printf "\n"; printf "%s", buf; printed = 1 }
+  }
+  have = 0; buf = ""
+}
+/^### / { flush(); have = 1; buf = $0 "\n"; next }   # entry start (MUST precede the ## rule)
+/^## /  { flush(); next }                            # section heading: ends/ignores any entry
+{ if (have) buf = buf $0 "\n" }
+END {
+  flush()
+  if (total == 0) { print "no matching entries"; exit 0 }
+  if (total > limit) printf "\n... (%d more match(es) omitted)\n", total - limit
+}
+' "$CONTEXT"
+exit 0
