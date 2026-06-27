@@ -73,17 +73,78 @@ step.
 | **Automatic** re-injection after compaction | manual (read the file) | ✅ via hooks |
 | Checkpoint nudge when stale | — | ✅ |
 
-## Usage
+## How to use
 
-Most of the time you do nothing — Claude checkpoints durable specifics at meaningful
-milestones (decisions with the *why* and rejected alternatives, root causes, dead-ends,
-key paths/configs, and preferences you state).
+### 1. Install once
 
-- **Force a checkpoint** (full install): `/checkpoint`
-- **Recall past work** (full install): `/recall redis timeout`
-  - Matching is **per-word (AND), case-insensitive — not phrase search**: every word must
-    appear in an entry. It returns whole matching entries from the Checkpoint Log +
-    Archive, most-recent first.
+Full experience (recommended):
+
+```bash
+/plugin marketplace add KashifManzer/magnum-memory
+/plugin install magnum-memory@magnum-memory-marketplace
+```
+
+(Or skill-only: `npx skills add https://github.com/KashifManzer/magnum-memory --skill magnum-memory`.)
+
+### 2. Just work — memory builds itself
+
+Use Claude Code normally. At meaningful moments (a decision, a root cause, a dead-end, a
+key path/config), Claude appends to `.claude/memory/CONTEXT.md`. You don't have to do
+anything. A file in flight looks like:
+
+```markdown
+## Current State
+- **Goal:** add OAuth login
+- **Decisions:** use Auth.js — *why:* built-in providers; *rejected:* hand-rolled JWT
+- **Load-bearing facts:** auth config at `src/auth/config.ts`; run `npm run db:migrate` after schema changes
+
+## Checkpoint Log
+### 2026-06-27T14:03Z — OAuth provider chosen
+- picked Auth.js over hand-rolled JWT (refresh handled for us)
+- dead-end: NextAuth v4 — incompatible with our app-router setup
+```
+
+### 3. After a compaction — it comes back automatically
+
+With the full plugin, the `SessionStart` hook re-injects the **Current State** right after
+a compaction (and on resume) as background context. Nothing to do.
+*(Skill-only: ask Claude to read `.claude/memory/CONTEXT.md`, or it will when relevant.)*
+
+### 4. Save on demand — `/checkpoint`
+
+Force a checkpoint anytime (e.g. before ending a session):
+
+```text
+/checkpoint
+```
+
+Claude writes anything durable since the last save and reports a one-line summary.
+
+### 5. Look up past work — `/recall`
+
+```text
+/recall redis timeout
+```
+
+Returns whole matching entries from the Checkpoint Log + Archive, newest first. Matching is
+**per-word (AND), case-insensitive — not a phrase**: every word must appear in the entry.
+Example output:
+
+```text
+### 2026-06-20T10:00Z — redis timeout fix
+- raised the redis connection timeout to 5s
+```
+
+Tip: fewer words = broader results; more words = narrower. No matches prints
+`no matching entries` — try broader terms.
+
+### 6. Tune it (optional)
+
+```bash
+export MAGNUM_MEMORY_NUDGE_EVERY=12   # nudge to checkpoint less often (default 8 turns)
+export MAGNUM_MEMORY_RECALL_LIMIT=20  # return more /recall results (default 10)
+export MAGNUM_MEMORY_NUDGE=off        # turn the checkpoint nudge off entirely
+```
 
 ## The memory file
 
@@ -101,7 +162,7 @@ All optional, via environment variables:
 
 | Variable | Default | Effect |
 |---|---|---|
-| `MAGNUM_MEMORY_NUDGE` | (on) | Set to `off`/`0`/`false` to disable the checkpoint nudge |
+| `MAGNUM_MEMORY_NUDGE` | (on) | Set to `off`/`0`/`false` (any case) to disable; any other value or unset leaves the checkpoint nudge enabled |
 | `MAGNUM_MEMORY_NUDGE_EVERY` | `8` | Turns since last checkpoint before nudging |
 | `MAGNUM_MEMORY_RECALL_LIMIT` | `10` | Max entries `/recall` returns |
 
