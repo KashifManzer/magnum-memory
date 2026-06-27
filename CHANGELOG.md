@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- The `magnum-memory` skill now instructs Claude to keep secret *values* out of the memory
+  file (recording a safe reference, e.g. an env-var name, instead). Guidance only — there
+  is no automated redaction; the file remains local and gitignored.
+
 ## [0.2.0] - 2026-06-26
 
 ### Added

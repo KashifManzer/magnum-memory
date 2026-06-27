@@ -12,5 +12,7 @@ Run a full **magnum-memory** checkpoint right now.
    preferences) — never duplicate the live narrative.
 4. Append timestamped entries to the Checkpoint Log (before `## Archive`) and
    reconcile the Current State section in place.
+5. **Never write secret values** (API keys, tokens, passwords) — record a safe
+   reference (e.g. an env-var name) instead.
 
 Report a one-line summary of what you saved.

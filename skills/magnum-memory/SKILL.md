@@ -82,6 +82,18 @@ Event-driven = write the moment it happens. Batched = flush at natural breakpoin
    decisions, remove superseded items. Do not drop still-relevant facts. Update the
    `<!-- Updated: ... -->` timestamp.
 
+## Never write secrets
+
+Do not write secret **values** into the memory file — no API keys, tokens, passwords,
+private keys, or credentialed connection strings. If a secret is load-bearing context,
+record a **safe reference** instead of the value:
+
+- ✅ "OpenAI key in `$OPENAI_API_KEY`"; "DB creds in `.env` (not committed)"
+- ❌ "OPENAI_API_KEY=sk-abc123…"
+
+The file is gitignored and never leaves the machine, but it is plaintext and there is **no
+automated redaction** — so keep secrets out of it in the first place.
+
 ## Distillation
 
 When the Checkpoint Log exceeds ~40 entries or ~400 lines: confirm Current State
