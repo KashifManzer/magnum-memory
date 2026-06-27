@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON manifests
+        run: |
+          python3 -m json.tool .claude-plugin/plugin.json > /dev/null
+          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
+          python3 -m json.tool hooks/hooks.json > /dev/null
+
+      - name: Shellcheck (run-hook.cmd excluded — bat/bash polyglot)
+        run: |
+          shellcheck --severity=warning \
+            hooks/session-start hooks/pre-compact hooks/user-prompt-submit \
+            scripts/mm-ensure-init scripts/mm-recall tests/*.sh
+
+      - name: Run test suite
+        run: |
+          for t in tests/test-*.sh; do echo "== $t =="; bash "$t" || exit 1; done
